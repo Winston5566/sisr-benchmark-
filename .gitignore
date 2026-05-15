@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Data & checkpoints (too large for git)
+/data/
+/checkpoints/
+results/
+results/
+*.pth
+*.pt
+
+# Office / binary docs
+*.docx
+*.xlsx
+*.pdf
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb

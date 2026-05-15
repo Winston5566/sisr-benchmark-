@@ -1,0 +1,223 @@
+\documentclass[aspectratio=169]{beamer}
+\usetheme{Madrid}
+\usecolortheme{whale}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\setbeamertemplate{navigation symbols}{}
+
+% ── Title info ────────────────────────────────────────────────
+\title[SISR: CNN vs.\ Transformer]{Single Image Super-Resolution:\\
+A Systematic Comparison of CNN-Based and Transformer-Based Methods}
+\subtitle{Week 1 Progress Report}
+\author{Student Name}
+\institute{M.Sc.\ MISCADA · Durham University}
+\date{May 2026}
+
+\begin{document}
+
+% ── Slide 1: Title ────────────────────────────────────────────
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ── Slide 2: Outline ─────────────────────────────────────────
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+\section{Motivation \& Research Question}
+
+% ── Slide 3: Motivation ───────────────────────────────────────
+\begin{frame}{Motivation}
+  \begin{columns}
+    \column{0.55\textwidth}
+      \textbf{Single Image Super-Resolution (SISR)} recovers a high-resolution (HR) image from a single low-resolution (LR) input.\\[6pt]
+      \textbf{Why it matters:}
+      \begin{itemize}
+        \item Satellite \& aerial imaging
+        \item Medical diagnostics (MRI, CT)
+        \item Surveillance and forensics
+        \item Consumer photography
+      \end{itemize}
+      \vspace{6pt}
+      \textbf{The challenge:} The problem is inherently \emph{ill-posed} — infinitely many HR images can correspond to the same LR input.
+    \column{0.42\textwidth}
+      \centering
+      \textit{Bicubic (baseline)}\\[4pt]
+      $\downarrow$\\[2pt]
+      \textit{Deep-learning SR}\\[4pt]
+      $\downarrow$\\[2pt]
+      \textit{Sharper edges, finer textures}
+  \end{columns}
+\end{frame}
+
+% ── Slide 4: Research Question ────────────────────────────────
+\begin{frame}{Research Question}
+  \begin{block}{Core Question}
+    How do \textbf{5 landmark CNN-based} SISR models (SRCNN, FSRCNN, VDSR, ESPCN, EDSR) and \textbf{5 leading Transformer-based} models (RCAN, IPT, SwinIR, HAT, DRCT) compare when trained and evaluated under \emph{identical} controlled conditions, and what architectural factors most significantly impact performance, efficiency, and generalisation?
+  \end{block}
+  \vspace{8pt}
+  \textbf{What makes this novel:}
+  \begin{itemize}
+    \item Existing papers report results under \emph{different} training settings
+    \item No systematic head-to-head comparison on a unified benchmark suite exists
+    \item This study enforces a single training dataset, optimiser, and scale factor
+  \end{itemize}
+\end{frame}
+
+\section{Literature Review}
+
+% ── Slide 5: CNN-Based Methods ────────────────────────────────
+\begin{frame}{CNN-Based SISR Methods (2014–2017)}
+  \begin{center}
+  \small
+  \begin{tabular}{@{}lllll@{}}
+    \toprule
+    \textbf{Model} & \textbf{Year} & \textbf{Params} & \textbf{Key Innovation} & \textbf{Set5 PSNR $\times$4} \\
+    \midrule
+    Bicubic   & --   & --    & Fixed interpolation            & 28.42 dB \\
+    SRCNN     & 2014 & 57K   & First end-to-end CNN for SR    & 28.95 dB \\
+    FSRCNN    & 2016 & 12K   & Post-upsampling; 56$\times$ faster & 29.21 dB \\
+    VDSR      & 2016 & 665K  & 20-layer global residual       & 29.77 dB \\
+    ESPCN     & 2016 & 20K   & Sub-pixel convolution          & 29.55 dB \\
+    EDSR      & 2017 & 43M   & Removes BatchNorm; NTIRE 2017  & 30.52 dB \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \vspace{4pt}
+  \begin{itemize}
+    \item Steady PSNR gain of \textbf{+2.1 dB} from Bicubic to EDSR over three years
+    \item Key trade-off: accuracy (EDSR) vs.\ speed (FSRCNN, ESPCN)
+  \end{itemize}
+\end{frame}
+
+% ── Slide 6: Transformer-Based Methods ───────────────────────
+\begin{frame}{Transformer-Based SISR Methods (2018–2024)}
+  \begin{center}
+  \small
+  \begin{tabular}{@{}lllll@{}}
+    \toprule
+    \textbf{Model} & \textbf{Year} & \textbf{Params} & \textbf{Key Innovation} & \textbf{Set5 PSNR $\times$4} \\
+    \midrule
+    RCAN   & 2018 & 15.6M & Channel attention (RIR)          & 30.77 dB \\
+    IPT    & 2021 & 115M  & Large-scale pre-trained ViT      & 32.64 dB \\
+    SwinIR & 2021 & 11.8M & Shifted-window self-attention    & 32.92 dB \\
+    HAT    & 2023 & 20.8M & Hybrid + overlapping cross-attn  & 33.04 dB \\
+    DRCT   & 2024 & 14.1M & Dense-residual connections       & 33.11 dB \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \vspace{4pt}
+  \begin{itemize}
+    \item Transformers achieve \textbf{+2.6 dB} over best CNN (EDSR $\to$ DRCT)
+    \item SwinIR's shifted-window attention is the dominant backbone paradigm
+    \item Efficiency improving: DRCT (14.1M) outperforms IPT (115M)
+  \end{itemize}
+\end{frame}
+
+\section{Experimental Setup}
+
+% ── Slide 7: Datasets \& Metrics ─────────────────────────────
+\begin{frame}{Benchmark Datasets \& Evaluation Metrics}
+  \begin{columns}
+    \column{0.5\textwidth}
+      \textbf{Training:}
+      \begin{itemize}
+        \item DIV2K — 800 HR images, diverse content
+      \end{itemize}
+      \vspace{6pt}
+      \textbf{Test Benchmarks:}
+      \begin{itemize}
+        \item \textbf{Set5} (5 imgs) — quick sanity check
+        \item \textbf{Set14} (14 imgs) — standard evaluation
+        \item \textbf{BSD100} (100 imgs) — generalisation
+        \item \textbf{Urban100} (100 imgs) — textures \& structure (hardest)
+      \end{itemize}
+    \column{0.47\textwidth}
+      \textbf{Metrics:}
+      \begin{itemize}
+        \item \textbf{PSNR} (dB) — pixel-level fidelity\\
+              $10\log_{10}(\text{MAX}^2/\text{MSE})$
+        \item \textbf{SSIM} — structural similarity\\
+              (luminance, contrast, structure)
+        \item Both measured on \textbf{Y channel} (YCbCr)
+        \item \textbf{Inference time} (ms/image) on a fixed GPU
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\section{Research Gaps}
+
+% ── Slide 8: Research Gaps ────────────────────────────────────
+\begin{frame}{Identified Research Gaps}
+  \begin{enumerate}
+    \item \textbf{Efficiency–accuracy trade-off is under-studied}\\
+      Large models (IPT 115M, EDSR 43M) are impractical for edge devices.
+
+    \vspace{6pt}
+    \item \textbf{Benchmark saturation}\\
+      Set5 and Set14 are too small and too idealised; BSD100 and Urban100 are better but still assume bicubic degradation.
+
+    \vspace{6pt}
+    \item \textbf{Synthetic degradation gap}\\
+      Nearly all models are trained on bicubic downsampling, not real-world noise, JPEG compression, or camera blur.
+
+    \vspace{6pt}
+    \item \textbf{No fair unified comparison}\\
+      Published results use different training datasets, optimisers, and scale factors — direct comparison is misleading.
+  \end{enumerate}
+\end{frame}
+
+\section{Project Plan}
+
+% ── Slide 9: Methodology ─────────────────────────────────────
+\begin{frame}{Experimental Methodology}
+  \begin{block}{Controlled Comparison Protocol}
+    All 10 models share: \textbf{same training data (DIV2K)} · \textbf{same optimiser} · \textbf{same scale factor ($\times$4)} · \textbf{same evaluation pipeline}
+  \end{block}
+  \vspace{8pt}
+  \begin{columns}
+    \column{0.48\textwidth}
+      \textbf{CNN models} (train from scratch):\\
+      SRCNN · FSRCNN · VDSR · ESPCN · EDSR
+    \column{0.48\textwidth}
+      \textbf{Transformer models} (pre-trained + fine-tune):\\
+      RCAN · IPT · SwinIR · HAT · DRCT
+  \end{columns}
+  \vspace{10pt}
+  \textbf{Planned ablations:}
+  \begin{itemize}
+    \item Depth / channel width impact on PSNR
+    \item Attention type (channel vs.\ window vs.\ cross)
+    \item Parameter count vs.\ reconstruction quality scatter plot
+  \end{itemize}
+\end{frame}
+
+% ── Slide 10: Timeline & Next Steps ──────────────────────────
+\begin{frame}{Project Timeline \& Next Steps}
+  \begin{center}
+  \small
+  \begin{tabular}{@{}llp{6.5cm}@{}}
+    \toprule
+    \textbf{Phase} & \textbf{Period} & \textbf{Deliverable} \\
+    \midrule
+    1 — CNN Training     & 27 Apr – 18 May & SRCNN, FSRCNN, VDSR, ESPCN, EDSR evaluated on Set5/Set14/BSD100 \\
+    2 — Transformer      & 19 May – 15 Jun & RCAN, IPT, SwinIR, HAT, DRCT; extend to Urban100 \\
+    3 — Ablation         & 16 Jun – 29 Jun & Ablation studies, qualitative analysis, efficiency profiling \\
+    4 — Results          & 30 Jun – 13 Jul & Full comparison tables, threat-to-validity analysis \\
+    5 — Write-up         & 14 Jul – 4 Sep  & Dissertation draft, supervisor review, final submission \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \vspace{8pt}
+  \textbf{Immediate next steps (this week):}
+  \begin{itemize}
+    \item Finalise data pipeline and training scripts
+    \item Complete SRCNN and FSRCNN training runs
+    \item Validate evaluation metrics against published numbers ($\pm$0.1 dB)
+  \end{itemize}
+\end{frame}
+
+\end{document}
