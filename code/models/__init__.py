@@ -3,13 +3,17 @@ from .fsrcnn import FSRCNN
 from .vdsr import VDSR
 from .espcn import ESPCN
 from .edsr import EDSR
+from .rcan import RCAN
+from .swinir import SwinIR
 
 _REGISTRY = {
-    'srcnn': SRCNN,
+    'srcnn':  SRCNN,
     'fsrcnn': FSRCNN,
-    'vdsr': VDSR,
-    'espcn': ESPCN,
-    'edsr': EDSR,
+    'vdsr':   VDSR,
+    'espcn':  ESPCN,
+    'edsr':   EDSR,
+    'rcan':   RCAN,
+    'swinir': SwinIR,
 }
 
 

@@ -74,7 +74,7 @@ def evaluate(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Evaluate SISR models on standard benchmarks')
-    parser.add_argument('--model',      required=True, choices=['srcnn','fsrcnn','vdsr','espcn','edsr'])
+    parser.add_argument('--model',      required=True, choices=['srcnn','fsrcnn','vdsr','espcn','edsr','rcan','swinir'])
     parser.add_argument('--scale',      type=int,   default=4)
     parser.add_argument('--checkpoint', required=True, help='Path to .pth checkpoint file')
     parser.add_argument('--test-dir',   required=True, help='Root dir containing Set5/, Set14/, etc.')
