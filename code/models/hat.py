@@ -188,15 +188,10 @@ class OCAB(nn.Module):
         out  = self.proj(out)
 
         # Reconstruct spatial feature map
-        out = window_reverse(out.view(B * nW // nW, nWh, nWw, ws, ws, C)
-                             .view(-1, ws, ws, C) if False else
-                             out.view(B, nW, ws * ws, C)
-                             .view(B, nWh, nWw, ws, ws, C)
-                             .permute(0, 1, 3, 2, 4, 5)
-                             .reshape(B, Hp, Wp, C),
-                             ws, Hp, Wp)
-        # Simplified: just reshape back
-        out_2d = out.view(B, nWh, nWw, ws, ws, C).permute(0, 1, 3, 2, 4, 5).reshape(B, Hp, Wp, C)
+        out_2d = (out.view(B, nW, ws * ws, C)
+                     .view(B, nWh, nWw, ws, ws, C)
+                     .permute(0, 1, 3, 2, 4, 5)
+                     .reshape(B, Hp, Wp, C))
         if pb or pr:
             out_2d = out_2d[:, :H, :W, :].contiguous()
 
