@@ -23,8 +23,15 @@ _REGISTRY = {
 }
 
 
+# Models whose constructors do not accept a `scale` argument
+# (they use pre-upsampled input; scale is handled in train.py/evaluate.py)
+_NO_SCALE = {'srcnn', 'vdsr'}
+
+
 def get_model(name: str, **kwargs):
     name = name.lower()
     if name not in _REGISTRY:
         raise ValueError(f"Unknown model '{name}'. Available: {list(_REGISTRY)}")
+    if name in _NO_SCALE:
+        kwargs.pop('scale', None)
     return _REGISTRY[name](**kwargs)
