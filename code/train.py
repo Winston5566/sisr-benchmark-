@@ -86,7 +86,7 @@ def train(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train CNN-based SISR models on DIV2K')
-    parser.add_argument('--model',      required=True, choices=['srcnn','fsrcnn','vdsr','espcn','edsr','rcan','swinir'])
+    parser.add_argument('--model',      required=True, choices=['srcnn','fsrcnn','vdsr','espcn','edsr','rcan','swinir','hat','drct','ipt'])
     parser.add_argument('--scale',      type=int,   default=4)
     parser.add_argument('--data-dir',   required=True, help='Path to DIV2K HR training images')
     parser.add_argument('--epochs',     type=int,   default=300)

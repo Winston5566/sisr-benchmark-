@@ -5,6 +5,9 @@ from .espcn import ESPCN
 from .edsr import EDSR
 from .rcan import RCAN
 from .swinir import SwinIR
+from .hat import HAT
+from .drct import DRCT
+from .ipt import IPT
 
 _REGISTRY = {
     'srcnn':  SRCNN,
@@ -14,6 +17,9 @@ _REGISTRY = {
     'edsr':   EDSR,
     'rcan':   RCAN,
     'swinir': SwinIR,
+    'hat':    HAT,
+    'drct':   DRCT,
+    'ipt':    IPT,
 }
 
 
