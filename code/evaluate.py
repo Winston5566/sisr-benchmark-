@@ -24,7 +24,7 @@ BENCHMARK_NAMES = ['Set5', 'Set14', 'BSD100', 'Urban100']
 def evaluate(args):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    model = get_model(args.model, scale=args.scale).to(device)
+    model = get_model(args.model, scale=args.scale, num_channels=3).to(device)
     state = torch.load(args.checkpoint, map_location=device)
     model.load_state_dict(state)
     model.eval()

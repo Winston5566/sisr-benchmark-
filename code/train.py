@@ -32,7 +32,7 @@ def train(args):
     loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True,
                         num_workers=4, pin_memory=True, drop_last=True)
 
-    model = get_model(args.model, scale=args.scale).to(device)
+    model = get_model(args.model, scale=args.scale, num_channels=3).to(device)
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"[train] trainable parameters: {n_params:,}")
 
