@@ -42,7 +42,7 @@ def bicubic_sr(lr: Image.Image, scale: int) -> Image.Image:
 
 def model_sr(lr_tensor: torch.Tensor, model_name: str,
              ckpt_path: str, scale: int, device: torch.device) -> Image.Image:
-    model = get_model(model_name, scale=scale).to(device)
+    model = get_model(model_name, scale=scale, num_channels=3).to(device)
     model.load_state_dict(torch.load(ckpt_path, map_location=device))
     model.eval()
     with torch.no_grad():
