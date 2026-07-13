@@ -17,7 +17,16 @@ pip install "datasets<3.0" pillow -q -i https://pypi.tuna.tsinghua.edu.cn/simple
 echo "=== Downloading DIV2K training set (800 HR images) ==="
 HF_ENDPOINT=https://hf-mirror.com python3 - <<'PYEOF'
 import os
+import shutil
 from datasets import load_dataset
+
+def save_image(value, dst):
+    # eugenesiow/* dataset scripts yield the "hr"/"lr" fields as plain file
+    # path strings (not decoded PIL Images), so copy the file directly.
+    if isinstance(value, str):
+        shutil.copy2(value, dst)
+    else:
+        value.save(dst)
 
 out = "/root/autodl-tmp/data/DIV2K_train_HR"
 os.makedirs(out, exist_ok=True)
@@ -26,7 +35,7 @@ ds = load_dataset("eugenesiow/Div2k", "bicubic_x4",
                   split="train", cache_dir="/root/autodl-tmp/hf_cache",
                   trust_remote_code=True)
 for i, item in enumerate(ds):
-    item["hr"].save(f"{out}/{i+1:04d}.png")
+    save_image(item["hr"], f"{out}/{i+1:04d}.png")
     if (i + 1) % 100 == 0:
         print(f"  {i+1}/800 saved")
 print(f"DIV2K done -> {out}")
@@ -35,7 +44,16 @@ PYEOF
 echo "=== Downloading test benchmarks ==="
 HF_ENDPOINT=https://hf-mirror.com python3 - <<'PYEOF'
 import os
+import shutil
 from datasets import load_dataset
+
+def save_image(value, dst):
+    # eugenesiow/* dataset scripts yield the "hr"/"lr" fields as plain file
+    # path strings (not decoded PIL Images), so copy the file directly.
+    if isinstance(value, str):
+        shutil.copy2(value, dst)
+    else:
+        value.save(dst)
 
 BASE = "/root/autodl-tmp/data/benchmarks"
 SETS = {
@@ -52,7 +70,7 @@ for name, (repo, config, split) in SETS.items():
     ds = load_dataset(repo, config, split=split, cache_dir="/root/autodl-tmp/hf_cache",
                       trust_remote_code=True)
     for i, item in enumerate(ds):
-        item["hr"].save(f"{out}/{i+1:04d}.png")
+        save_image(item["hr"], f"{out}/{i+1:04d}.png")
     print(f"  {name} done ({len(ds)} images) -> {out}")
 
 print("All benchmarks done.")
