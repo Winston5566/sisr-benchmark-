@@ -52,7 +52,7 @@ def main(args):
     print(f"Device: {device}  |  Input LR size: {args.input_size}  |  Scale: ×{args.scale}\n")
 
     H, W   = args.input_size
-    lr_inp = torch.randn(1, 1, H, W).to(device)
+    lr_inp = torch.randn(1, 3, H, W).to(device)
     bi_inp = torch.nn.functional.interpolate(
         lr_inp, scale_factor=args.scale, mode='bicubic', align_corners=False
     )
@@ -64,7 +64,7 @@ def main(args):
 
     for name in MODELS:
         try:
-            model = get_model(name, scale=args.scale).to(device)
+            model = get_model(name, scale=args.scale, num_channels=3).to(device)
             n_params = count_params(model)
             inp = bi_inp if name in PRE_UPSAMPLE else lr_inp
             ms  = measure_time(model, inp, device, args.repeats)

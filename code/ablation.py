@@ -71,7 +71,7 @@ STUDIES = {
 
 def run_variant(cfg: dict, args) -> dict:
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model  = cfg['model'](scale=args.scale, **cfg['kwargs']).to(device)
+    model  = cfg['model'](scale=args.scale, num_channels=3, **cfg['kwargs']).to(device)
     n_params = sum(p.numel() for p in model.parameters())
 
     train_set = DIV2KDataset(args.data_dir, scale=args.scale, patch_size=48)
