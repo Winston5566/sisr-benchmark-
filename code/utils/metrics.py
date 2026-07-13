@@ -92,3 +92,43 @@ def _ssim(x: torch.Tensor, y: torch.Tensor,
     num = (2.0 * mu_xy + C1) * (2.0 * sig_xy + C2)
     den = (mu_x2 + mu_y2 + C1) * (sig_x2 + sig_y2 + C2)
     return (num / den).mean().item()
+
+
+# ── Perceptual metrics (RGB, following LPIPS/MS-SSIM literature convention) ───
+
+def ms_ssim(sr: torch.Tensor, hr: torch.Tensor, scale: int = 4) -> float:
+    """Multi-Scale SSIM on the RGB image.
+
+    Args:
+        sr, hr : float tensors [C, H, W] in [0, 1]
+        scale  : upscaling factor (border crop)
+    """
+    from pytorch_msssim import ms_ssim as _ms_ssim_fn
+    with torch.no_grad():
+        sr = sr.unsqueeze(0).clamp(0.0, 1.0)
+        hr = hr.unsqueeze(0).clamp(0.0, 1.0)
+        sr = sr[..., scale:-scale, scale:-scale]
+        hr = hr[..., scale:-scale, scale:-scale]
+        return _ms_ssim_fn(sr, hr, data_range=1.0).item()
+
+
+class LPIPS:
+    """Learned Perceptual Image Patch Similarity (AlexNet backbone).
+
+    Instantiate once and reuse across images -- constructing this class loads
+    the pretrained AlexNet backbone, which is expensive to repeat per-call.
+    """
+
+    def __init__(self, device: str = 'cpu'):
+        import lpips
+        self._net = lpips.LPIPS(net='alex').to(device).eval()
+        self._device = device
+
+    @torch.no_grad()
+    def __call__(self, sr: torch.Tensor, hr: torch.Tensor, scale: int = 4) -> float:
+        sr = sr.unsqueeze(0).clamp(0.0, 1.0).to(self._device)
+        hr = hr.unsqueeze(0).clamp(0.0, 1.0).to(self._device)
+        sr = sr[..., scale:-scale, scale:-scale]
+        hr = hr[..., scale:-scale, scale:-scale]
+        # lpips expects inputs in [-1, 1]
+        return self._net(sr * 2 - 1, hr * 2 - 1).item()

@@ -24,6 +24,7 @@ Note on usage:
 """
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 # ── Transformer components ────────────────────────────────────────────────────
@@ -163,7 +164,6 @@ class IPT(nn.Module):
         pw = (self.patch_size - W % self.patch_size) % self.patch_size
         x  = F.pad(x, (0, pw, 0, ph), mode='reflect') if (ph or pw) else x
 
-        import torch.nn.functional as F  # local import avoids circular issue
         feat = self.head(x)
 
         tokens, Hp, Wp = self.patch_embed(feat)

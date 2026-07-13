@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 
 from models import get_model
 from data import SRBenchmark
-from utils import psnr, ssim
+from utils import psnr, ssim, ms_ssim, LPIPS
 
 PRE_UPSAMPLE = {'srcnn', 'vdsr'}
 BENCHMARK_NAMES = ['Set5', 'Set14', 'BSD100', 'Urban100']
@@ -29,6 +29,8 @@ def evaluate(args):
     model.load_state_dict(state)
     model.eval()
 
+    lpips_fn = LPIPS(device=device)
+
     test_root = Path(args.test_dir)
     datasets = {name: test_root / name
                 for name in BENCHMARK_NAMES
@@ -37,7 +39,8 @@ def evaluate(args):
     if not datasets:
         raise FileNotFoundError(f"No benchmark folders found under {test_root}")
 
-    header = f"{'Model':<10} {'Dataset':<12} {'PSNR (dB)':>10} {'SSIM':>8} {'ms/img':>8}"
+    header = (f"{'Model':<10} {'Dataset':<12} {'PSNR (dB)':>10} {'SSIM':>8} "
+              f"{'MS-SSIM':>8} {'LPIPS':>8} {'ms/img':>8}")
     print('\n' + header)
     print('-' * len(header))
 
@@ -45,7 +48,7 @@ def evaluate(args):
         ds = SRBenchmark(str(path), scale=args.scale)
         loader = DataLoader(ds, batch_size=1, shuffle=False, num_workers=2)
 
-        total_psnr = total_ssim = total_ms = 0.0
+        total_psnr = total_ssim = total_msssim = total_lpips = total_ms = 0.0
 
         with torch.no_grad():
             for lr_img, hr_img, _ in loader:
@@ -64,12 +67,16 @@ def evaluate(args):
                     torch.cuda.synchronize()
                 total_ms += (time.perf_counter() - t0) * 1000.0
 
-                total_psnr += psnr(sr_img.squeeze(0), hr_img.squeeze(0), scale=args.scale)
-                total_ssim += ssim(sr_img.squeeze(0), hr_img.squeeze(0), scale=args.scale)
+                sr_s, hr_s = sr_img.squeeze(0), hr_img.squeeze(0)
+                total_psnr += psnr(sr_s, hr_s, scale=args.scale)
+                total_ssim += ssim(sr_s, hr_s, scale=args.scale)
+                total_msssim += ms_ssim(sr_s, hr_s, scale=args.scale)
+                total_lpips += lpips_fn(sr_s, hr_s, scale=args.scale)
 
         n = len(ds)
         print(f"{args.model.upper():<10} {name:<12} "
-              f"{total_psnr/n:>10.2f} {total_ssim/n:>8.4f} {total_ms/n:>8.1f}")
+              f"{total_psnr/n:>10.2f} {total_ssim/n:>8.4f} "
+              f"{total_msssim/n:>8.4f} {total_lpips/n:>8.4f} {total_ms/n:>8.1f}")
 
 
 if __name__ == '__main__':
