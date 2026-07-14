@@ -4,7 +4,7 @@ Chen et al., CVPR 2021  |  https://arxiv.org/abs/2012.00364
 
 Input:  LR image   [B, C, H, W]
 Output: HR image   [B, C, H*s, W*s]
-Params: ~115.5 M
+Params: 164.13 M (scale=4, num_channels=3, default config)
 
 Architecture (single-task SR variant):
   Head (task-specific conv) → PatchEmbed → Transformer encoder (ViT body)
